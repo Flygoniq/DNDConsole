@@ -2,15 +2,18 @@ import controlP5.*;
 
 ControlP5 cp5;
 String requestedChange;
-int currentHP, baseHP; //these should be read from a character class later
+int currentHP, baseHP, effectCount; //these should be read from a character class later
+StatusEffect[][] EffectsArray;
 
 //create controllers in setup
 void setup() {
   currentHP = 7;
   baseHP = 10; //remove later********
+  effectCount = 0;
   size(1200,600);
   PFont font = createFont("arial",20);
   cp5 = new ControlP5(this);
+  EffectsArray = new StatusEffect[3][3];
   
   //Following block is the Name bar
   cp5.addBang("nameField") //a bang is a button that does not pass a value
@@ -58,6 +61,15 @@ void setup() {
      .setFont(font)
      ;
   
+  //Status Effect Business
+  cp5.addTextlabel("Statuslabel")
+     .setText("Status:")
+     .setPosition(20, 100)
+     .setFont(font)
+     ;
+  
+  
+  
   
   textFont(font);
 }
@@ -65,6 +77,8 @@ void setup() {
 //draw occurs once per frame.
 void draw() {
    background(0);
+   ellipse(100, 100, 10, 10);
+   ellipse(180, 120, 10, 10);
 }
 
 //create controller functions here by giving them the same name.
@@ -78,6 +92,7 @@ public void inputField(String input) {
     case "name":    cp5.getController("nameField").setLabel(input);
                     break;
     case "baseHP":  baseHP = Integer.parseInt(input); //this is dangerous.  Have to catch error.
+                    //wat do when baseHP shrinks past current?
                     int width = (int)((float)currentHP/(float)baseHP * (float)100);
                     cp5.getController("HPBarUpper").setSize(width,30);
                     cp5.get(Textlabel.class,"HPIndicator").setText(currentHP + "/" + baseHP);
