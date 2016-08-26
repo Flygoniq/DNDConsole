@@ -2,8 +2,10 @@ import controlP5.*;
 
 ControlP5 cp5;
 String requestedChange;
-int currentHP, baseHP, effectCount; //these should be read from a character class later
+int effectCount;
+int currentHP, baseHP, STR, DEX, CON, INT, CHA, WIS; //these should be read from a character class later
 StatusEffect[][] EffectsArray;
+PFont font;
 
 //create controllers in setup
 void setup() {
@@ -11,7 +13,7 @@ void setup() {
   baseHP = 10; //remove later********
   effectCount = 0;
   size(1200,600);
-  PFont font = createFont("arial",20);
+  font = createFont("arial",20);
   cp5 = new ControlP5(this);
   EffectsArray = new StatusEffect[3][3];
   
@@ -64,9 +66,13 @@ void setup() {
   //Status Effect Business
   cp5.addTextlabel("Statuslabel")
      .setText("Status:")
-     .setPosition(20, 100)
+     .setPosition(20, 170)
      .setFont(font)
      ;
+  cp5.addTextarea("StatusInfoWindow")
+     .setPosition(550, 280)
+     .setSize(200,200)
+     .hide();
   
   
   
@@ -77,8 +83,8 @@ void setup() {
 //draw occurs once per frame.
 void draw() {
    background(0);
-   ellipse(100, 100, 10, 10);
-   ellipse(180, 120, 10, 10);
+   ellipse(100, 170, 10, 10);
+   ellipse(180, 195, 10, 10);
 }
 
 //create controller functions here by giving them the same name.
