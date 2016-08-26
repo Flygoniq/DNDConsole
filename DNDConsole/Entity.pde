@@ -24,7 +24,7 @@ class Entity {
   }
   
   void nextTurn() {
-    
+    //fix Janet
   }
   
   void undo() {
@@ -37,7 +37,7 @@ class Entity {
   }
   
   void exportFile() {
-    
+    //fix Janet
   }
   
   void importFile(String fn) {
