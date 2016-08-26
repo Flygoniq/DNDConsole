@@ -1,14 +1,19 @@
 import controlP5.*;
 
 ControlP5 cp5;
-String requestedChange;
+String requestedChange, inputHolder;
+Boolean decision;
 int effectCount;
 int currentHP, baseHP, STR, DEX, CON, INT, CHA, WIS; //these should be read from a character class later
 StatusEffect[][] EffectsArray;
+StatusEffect newStatus;
 PFont font;
+Controller inputField;
+Controller[] decisionParts = new Controller[3];
 
 //create controllers in setup
 void setup() {
+  decision = false;
   currentHP = 7;
   baseHP = 10; //remove later********
   effectCount = 0;
@@ -23,12 +28,36 @@ void setup() {
      .setSize(80,30)
      .getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER)
      ;
-  cp5.addTextfield("inputField")
+  inputField = cp5.addTextfield("inputField")
      .setPosition(550, 280)
      .setSize(80,40)
      .setFont(font)
      .hide()
      ;
+  cp5.addBang("Yes")
+     .setPosition(540, 350)
+     .setSize(50, 30)
+     .setFont(font)
+     .getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER)
+     ;
+  decisionParts[0] = cp5.getController("Yes");
+  cp5.addBang("No")
+     .setPosition(600, 350)
+     .setSize(50, 30)
+     .setFont(font)
+     .getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER)
+     ;
+  decisionParts[1] = cp5.getController("No");
+  cp5.addTextlabel("DecisionLabel")
+     .setPosition(510, 300)
+     .setFont(font)
+     .setText("Add More Effects?")
+     .hide()
+     ;
+  decisionParts[2] = cp5.getController("DecisionLabel");
+  for (Controller c : decisionParts) {
+    c.hide();
+  }
      
   //Following block is the HP bar
   cp5.addTextlabel("HPLabel")
@@ -69,10 +98,17 @@ void setup() {
      .setPosition(20, 170)
      .setFont(font)
      ;
+  cp5.addBang("AddStatus")
+     .setLabel(" +")
+     .setPosition(5, 175)
+     .setSize(15, 15)
+     .getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER)
+     ;
   cp5.addTextarea("StatusInfoWindow")
      .setPosition(550, 280)
      .setSize(200,200)
-     .hide();
+     .hide()
+     ;
   
   
   
@@ -89,7 +125,8 @@ void draw() {
 
 //create controller functions here by giving them the same name.
 public void nameField() {
-  cp5.getController("inputField").show();
+  inputField.show();
+  inputField.setLabel("Name");
   requestedChange = "name";
 }
 
@@ -103,16 +140,46 @@ public void inputField(String input) {
                     cp5.getController("HPBarUpper").setSize(width,30);
                     cp5.get(Textlabel.class,"HPIndicator").setText(currentHP + "/" + baseHP);
                     break;
+    case "statusName": newStatus = new StatusEffect(input);
+                       requestedChange = "statusDescription";
+                       inputField.setLabel("Status Description");
+                       return;
+    case "statusDescription": newStatus.setDescription(input);
+                              requestedChange = "duration";
+                              inputField.setLabel("Duration");
+                              return;
+    case "duration": newStatus.setDuration(Integer.parseInt(input));
+                     requestedChange = "effectType";
+                     inputField.setLabel("Effect Type");
+                     return;
+    case "effectType": inputHolder = input;
+                       requestedChange = "effectMagnitude";
+                       inputField.setLabel("Effect Magnitude");
+                       return;
+    case "effectMagnitude": newStatus.addEffect(inputHolder, Integer.parseInt(input));
+                            requestedChange = "moreEffects";
+                            for (Controller c : decisionParts) {
+                              c.show();
+                            }
+                            break;
+                       
   }
-  cp5.getController("inputField").hide();
+  inputField.hide();
 }
 
 public void HPBarLower() {
-  cp5.getController("inputField").show();
+  inputField.show();
+  inputField.setLabel("New Base HP");
   requestedChange = "baseHP";
 }
 public void HPBarUpper() {
   HPBarLower();
+}
+
+public void AddStatus () {
+  inputField.show();
+  inputField.setLabel("New Status Name");
+  requestedChange = "statusName";
 }
 
 void keyPressed() {
@@ -122,6 +189,24 @@ void keyPressed() {
   if (key=='q') {
     cp5.getController("nameField").show();
   }
+}
   
-  
+public void Yes () {
+  makeDecision(true);
+}
+public void No () {
+  makeDecision(false);
+}
+public void makeDecision(boolean d) {
+  decision = d;
+  switch (requestedChange) {
+    case "moreEffects": if (d) {
+                          requestedChange = "effectType";
+                          inputField.setLabel("Effect Type");
+                          inputField.show();
+                        }
+  }
+  for (Controller c : decisionParts) {
+    c.hide();
+  }
 }

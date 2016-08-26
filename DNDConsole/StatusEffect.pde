@@ -9,6 +9,10 @@ class StatusEffect {
   int x, y;;
   
   public StatusEffect (String name) {
+     magnitude = new int[10];
+     effects = new String[10];
+     size = 0;
+     effectCount++;
      this.name = name;
      x = (effectCount - 1) % 3;
      y = (effectCount - 1) / 3;
@@ -20,7 +24,6 @@ class StatusEffect {
           }
         }
      }*/
-     EffectsArray[x][y] = this;
      ID = name + x + y;
      String labeltext;
      if (name.length() > 10) {
@@ -33,7 +36,7 @@ class StatusEffect {
        public void controlEvent(CallbackEvent theEvent) {
          switch(theEvent.getAction()) {
            case(ControlP5.ACTION_ENTER):
-             cp5.get(Textarea.class, "StatusInfoWindow").setText(toString()).show();
+             cp5.get(Textarea.class, "StatusInfoWindow").setText(makeString()).show();
              break;
            case(ControlP5.ACTION_LEAVE):
              cp5.get(Textarea.class, "StatusInfoWindow").hide();
@@ -52,49 +55,59 @@ class StatusEffect {
                      .setColorForeground(ControlP5.BLUE)
                      .addCallback(StatusCallback)
                      ;
+     statusBang.getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER);
+     EffectsArray[x][y] = this;
   }
   
   public StatusEffect (String name, String description) {
     this(name);
     this.description = description;
     duration = 0;
-    magnitude = new int[10];
-    effects = new String[10];
-    size = 0;
   }
   public StatusEffect (String name, String description, StatusEffect[] followups, int[] followupCalls) {
     this(name, description);
     duration = 0;
-    magnitude = new int[10];
-    effects = new String[10];
-    size = 0;
     this.followups = followups;
     this.followupCalls = followupCalls;
   }
   void addEffect (String effectType, int magnitude) {
     if (effectType == "STR") {
-      
-    } else if (effectType == "dex") {
-      
+      STR += magnitude;
+    } else if (effectType == "DEX") {
+      DEX += magnitude;
+    } else if (effectType == "CON") {
+      CON += magnitude;
+    } else if (effectType == "INT") {
+      INT += magnitude;
+    } else if (effectType == "CHA") {
+      CHA += magnitude;
+    } else if (effectType == "WIS") {
+      WIS += magnitude;
     }
     effects[size] = effectType;
-    this.magnitude[size] = magnitude;
+    this.magnitude[size++] = magnitude;
   }
   
   void tick() {//decrease duration, kill if 0.  Cause effects.
-    
+    for (int i = 0; i < size; i++) {
+      if (effects[i] == "HP") {
+        currentHP += magnitude[i];
+      }
+    }
   }
   
   void destroy() {
+    effectCount--;
     EffectsArray[x][y] = null;
     statusBang.remove();
     //also clear out array
   }
   
-  String toString() {
+  String makeString() {
     String answer = "";
     answer += "Name: " + name + "\n";
     answer += "Description: " + description + "\n";
+    println(size);
     for (int i = 0; i < size; i++) {
       answer+= "Effect: " + effects[i] + ", Magnitude: " + magnitude[i] + "\n";
     }
@@ -112,6 +125,12 @@ class StatusEffect {
   }
   String getDescription () {
     return description;
+  }
+  void setDuration (int dur) {
+    duration = dur;
+  }
+  int getDuration () {
+    return duration;
   }
 }
 
