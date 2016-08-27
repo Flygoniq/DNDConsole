@@ -6,9 +6,11 @@ class StatusEffect {
   StatusEffect[] followups;
   Bang statusBang;
   CallbackListener StatusCallback;
-  int x, y;;
+  int x, y;
+  StatusEffect self;
   
   public StatusEffect (String name) {
+     self = this;
      magnitude = new int[10];
      effects = new String[10];
      size = 0;
@@ -35,12 +37,15 @@ class StatusEffect {
      StatusCallback = new CallbackListener() {
        public void controlEvent(CallbackEvent theEvent) {
          switch(theEvent.getAction()) {
-           case(ControlP5.ACTION_ENTER):
+           case(ControlP5.ACTION_CLICK):
              cp5.get(Textarea.class, "StatusInfoWindow").setText(makeString()).show();
+             cp5.getController("StatusInfoX").show();
+             cp5.getController("StatusRemoval").show();
+             statusHolder = self;
              break;
-           case(ControlP5.ACTION_LEAVE):
+           /*case(ControlP5.ACTION_LEAVE):
              cp5.get(Textarea.class, "StatusInfoWindow").hide();
-             break;
+             break;*/
          }
        }
      };
@@ -94,6 +99,10 @@ class StatusEffect {
         currentHP += magnitude[i];
       }
     }
+    duration--;
+    if (duration == 0) {
+      destroy();
+    }
   }
   
   void destroy() {
@@ -107,7 +116,6 @@ class StatusEffect {
     String answer = "";
     answer += "Name: " + name + "\n";
     answer += "Description: " + description + "\n";
-    println(size);
     for (int i = 0; i < size; i++) {
       answer+= "Effect: " + effects[i] + ", Magnitude: " + magnitude[i] + "\n";
     }

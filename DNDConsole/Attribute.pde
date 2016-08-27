@@ -40,7 +40,7 @@ class Attribute {
   
   void updateMod() {
     for (int[] stat : primary) {
-      stat[3] = stat[1] + stat[2]
+      stat[3] = stat[1] + stat[2];
     }
   }
   

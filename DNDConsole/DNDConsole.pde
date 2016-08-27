@@ -6,7 +6,7 @@ Boolean decision;
 int effectCount;
 int currentHP, baseHP, STR, DEX, CON, INT, CHA, WIS; //these should be read from a character class later
 StatusEffect[][] EffectsArray;
-StatusEffect newStatus;
+StatusEffect statusHolder;
 PFont font;
 Controller inputField;
 Controller[] decisionParts = new Controller[3];
@@ -105,9 +105,23 @@ void setup() {
      .getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER)
      ;
   cp5.addTextarea("StatusInfoWindow")
-     .setPosition(550, 280)
-     .setSize(200,200)
-     .hide()
+     .setText("Ipsem Lorem")
+     .setPosition(500, 230)
+     .setSize(200,180)
+     .setColorBackground(ControlP5.GRAY)
+     //.hide()
+     ;
+  cp5.addBang("StatusInfoX")
+     .setPosition(700, 230)
+     .setSize(20, 20)
+     .setLabel(" X")
+     .getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER)
+     ;
+  cp5.addBang("StatusRemoval")
+     .setPosition(570, 400)
+     .setSize(60, 25)
+     .setLabel("Remove")
+     .getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER)
      ;
   
   
@@ -140,15 +154,15 @@ public void inputField(String input) {
                     cp5.getController("HPBarUpper").setSize(width,30);
                     cp5.get(Textlabel.class,"HPIndicator").setText(currentHP + "/" + baseHP);
                     break;
-    case "statusName": newStatus = new StatusEffect(input);
+    case "statusName": statusHolder = new StatusEffect(input);
                        requestedChange = "statusDescription";
                        inputField.setLabel("Status Description");
                        return;
-    case "statusDescription": newStatus.setDescription(input);
+    case "statusDescription": statusHolder.setDescription(input);
                               requestedChange = "duration";
                               inputField.setLabel("Duration");
                               return;
-    case "duration": newStatus.setDuration(Integer.parseInt(input));
+    case "duration": statusHolder.setDuration(Integer.parseInt(input));
                      requestedChange = "effectType";
                      inputField.setLabel("Effect Type");
                      return;
@@ -156,7 +170,7 @@ public void inputField(String input) {
                        requestedChange = "effectMagnitude";
                        inputField.setLabel("Effect Magnitude");
                        return;
-    case "effectMagnitude": newStatus.addEffect(inputHolder, Integer.parseInt(input));
+    case "effectMagnitude": statusHolder.addEffect(inputHolder, Integer.parseInt(input));
                             requestedChange = "moreEffects";
                             for (Controller c : decisionParts) {
                               c.show();
@@ -209,4 +223,15 @@ public void makeDecision(boolean d) {
   for (Controller c : decisionParts) {
     c.hide();
   }
+}
+public void StatusInfoX () {
+  cp5.get(Textarea.class, "StatusInfoWindow").hide();
+  cp5.getController("StatusInfoX").hide();
+  cp5.getController("StatusRemoval").hide();
+}
+public void StatusRemoval () {
+  statusHolder.destroy();
+  cp5.get(Textarea.class, "StatusInfoWindow").hide();
+  cp5.getController("StatusInfoX").hide();
+  cp5.getController("StatusRemoval").hide();
 }
