@@ -4,7 +4,8 @@ ControlP5 cp5;
 String requestedChange, inputHolder;
 Boolean decision;
 int effectCount;
-int currentHP, baseHP, STR, DEX, CON, INT, CHA, WIS; //these should be read from a character class later
+int currentHP, baseHP, currentMP, baseMP, effectiveMP,  STR, DEX, CON, INT, CHA, WIS, maxStam, currentStam, overStam, lockedStam; //these should be read from a character class later
+float lockedMP;
 StatusEffect[][] EffectsArray;
 StatusEffect statusHolder;
 PFont font;
@@ -14,8 +15,15 @@ Controller[] decisionParts = new Controller[3];
 //create controllers in setup
 void setup() {
   decision = false;
+  maxStam = 5;
+  currentStam = 3;
+  overStam = 2;
   currentHP = 7;
   baseHP = 10; //remove later********
+  currentMP = 10;
+  baseMP = 20;
+  lockedMP = .3;
+  effectiveMP = baseMP;
   effectCount = 0;
   size(1200,600);
   font = createFont("arial",20);
@@ -59,70 +67,14 @@ void setup() {
     c.hide();
   }
      
-  //Following block is the HP bar
-  cp5.addTextlabel("HPLabel")
-     .setText("HP")
-     .setPosition(20, 60)
-     .setFont(font)
-     //.setColorValue(0xffffff00)
-     /*.addCallback(new CallbackListener() {
-       public void controlEvent(CallbackEvent theEvent) {
-         if (theEvent.getAction()==ControlP5.ACTION_CLICK) {
-           //nameField();
-           //cp5.getController("inputField").show();
-         }
-       }
-     })*/
-     ;
-  cp5.addBang("HPBarLower")
-     .setPosition(60, 60)
-     .setSize(100, 30)
-     .setLabel("")
-     ;
-  cp5.addBang("HPBarUpper")
-     .setPosition(60, 60)
-     .setSize(70, 30)
-     .setLabel("")
-     .setColorActive(ControlP5.RED)
-     .setColorForeground(ControlP5.RED)
-     ;
-  cp5.addTextlabel("HPIndicator")
-     .setText("7/10")
-     .setPosition(90, 60)
+  initializeHP();
+  initializeMP();
+  cp5.addTextlabel("StamLabel")
+     .setText("Stam")
+     .setPosition(20, 120)
      .setFont(font)
      ;
-  
-  //Status Effect Business
-  cp5.addTextlabel("Statuslabel")
-     .setText("Status:")
-     .setPosition(20, 170)
-     .setFont(font)
-     ;
-  cp5.addBang("AddStatus")
-     .setLabel(" +")
-     .setPosition(5, 175)
-     .setSize(15, 15)
-     .getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER)
-     ;
-  cp5.addTextarea("StatusInfoWindow")
-     .setText("Ipsem Lorem")
-     .setPosition(500, 230)
-     .setSize(200,180)
-     .setColorBackground(ControlP5.GRAY)
-     //.hide()
-     ;
-  cp5.addBang("StatusInfoX")
-     .setPosition(700, 230)
-     .setSize(20, 20)
-     .setLabel(" X")
-     .getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER)
-     ;
-  cp5.addBang("StatusRemoval")
-     .setPosition(570, 400)
-     .setSize(60, 25)
-     .setLabel("Remove")
-     .getCaptionLabel().align(ControlP5.CENTER, ControlP5.CENTER)
-     ;
+  initializeStatusArea();
   
   
   
@@ -133,8 +85,18 @@ void setup() {
 //draw occurs once per frame.
 void draw() {
    background(0);
-   ellipse(100, 170, 10, 10);
-   ellipse(180, 195, 10, 10);
+   int gridDimension = 20;
+   for (int i = 0; i < width; i+= gridDimension) {
+     line(i, 0, i, height);
+   }
+   for (int i = 0; i < height; i+= gridDimension) {
+     line(0, i, width, i);
+   }
+   fill(255);
+   ellipse(100, 180, 10, 10);
+   ellipse(180, 205, 10, 10);
+   stroke(255);
+   drawStaminaBalls();
 }
 
 //create controller functions here by giving them the same name.
@@ -145,14 +107,22 @@ public void nameField() {
 }
 
 public void inputField(String input) {
+  int w;
   switch (requestedChange) {
     case "name":    cp5.getController("nameField").setLabel(input);
                     break;
     case "baseHP":  baseHP = Integer.parseInt(input); //this is dangerous.  Have to catch error.
                     //wat do when baseHP shrinks past current?
-                    int width = (int)((float)currentHP/(float)baseHP * (float)100);
-                    cp5.getController("HPBarUpper").setSize(width,30);
+                    w = (int)((float)currentHP/(float)baseHP * (float)100);
+                    cp5.getController("HPBarUpper").setSize(w,25);
                     cp5.get(Textlabel.class,"HPIndicator").setText(currentHP + "/" + baseHP);
+                    break;
+    case "baseMP":  baseMP = Integer.parseInt(input); //this is dangerous.  Have to catch error.
+                    //wat do when baseHP shrinks past current?
+                    //w = (int)((float)currentMP/(float)baseMP * (float)100);
+                    //cp5.getController("MPBarUpper").setSize(w,25);
+                    //cp5.get(Textlabel.class,"MPIndicator").setText(currentMP + "/" + baseMP);
+                    updateLockedMP();
                     break;
     case "statusName": statusHolder = new StatusEffect(input);
                        requestedChange = "statusDescription";
@@ -181,20 +151,8 @@ public void inputField(String input) {
   inputField.hide();
 }
 
-public void HPBarLower() {
-  inputField.show();
-  inputField.setLabel("New Base HP");
-  requestedChange = "baseHP";
-}
-public void HPBarUpper() {
-  HPBarLower();
-}
 
-public void AddStatus () {
-  inputField.show();
-  inputField.setLabel("New Status Name");
-  requestedChange = "statusName";
-}
+
 
 void keyPressed() {
   if (key=='r') {
@@ -202,6 +160,9 @@ void keyPressed() {
   }
   if (key=='q') {
     cp5.getController("nameField").show();
+  }
+  if (key=='u') {
+    updateStaminaBalls ();
   }
 }
   
@@ -223,15 +184,4 @@ public void makeDecision(boolean d) {
   for (Controller c : decisionParts) {
     c.hide();
   }
-}
-public void StatusInfoX () {
-  cp5.get(Textarea.class, "StatusInfoWindow").hide();
-  cp5.getController("StatusInfoX").hide();
-  cp5.getController("StatusRemoval").hide();
-}
-public void StatusRemoval () {
-  statusHolder.destroy();
-  cp5.get(Textarea.class, "StatusInfoWindow").hide();
-  cp5.getController("StatusInfoX").hide();
-  cp5.getController("StatusRemoval").hide();
 }

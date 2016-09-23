@@ -38,13 +38,13 @@ class StatusEffect {
        public void controlEvent(CallbackEvent theEvent) {
          switch(theEvent.getAction()) {
            case(ControlP5.ACTION_CLICK):
-             cp5.get(Textarea.class, "StatusInfoWindow").setText(makeString()).show();
-             cp5.getController("StatusInfoX").show();
+             cp5.get(Textarea.class, "InfoWindow").setText(makeString()).show();
+             cp5.getController("InfoX").show();
              cp5.getController("StatusRemoval").show();
              statusHolder = self;
              break;
            /*case(ControlP5.ACTION_LEAVE):
-             cp5.get(Textarea.class, "StatusInfoWindow").hide();
+             cp5.get(Textarea.class, "InfoWindow").hide();
              break;*/
          }
        }
@@ -53,7 +53,7 @@ class StatusEffect {
      
      statusBang = cp5.addBang(name)
                      .setSize(130, 25)
-                     .setPosition(100 + (140 * x), 170 + (35 * y))//would probably be best to base this off location of status label
+                     .setPosition(100 + (140 * x), 180 + (35 * y))//would probably be best to base this off location of status label
                      .setLabel(labeltext)
                      .setFont(font)
                      .setColorActive(ControlP5.BLUE)

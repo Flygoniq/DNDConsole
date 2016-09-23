@@ -1,5 +1,5 @@
 //This class defines any interactable entity in the world
-class Entity {
+/*class Entity {
   Entity previous;
   String name;
   double weight;
@@ -44,4 +44,4 @@ class Entity {
     //do stuff, fix Janet
   }
   
-}
+}*/

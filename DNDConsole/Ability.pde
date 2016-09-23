@@ -1,4 +1,4 @@
-class Ability {
+/*class Ability {
   int cooldown, currCooldown;
   int timer, currTimer;
   int manaCost, healthCost, stamCost, espCost;
@@ -58,10 +58,12 @@ class Ability {
         stepTimer();
         if (currTimer == 0) {
           addCharge();
-          if (currCharge == maxCharge) {
-            resetTimer();
-          else {
-            setTimer();
+        }
+        if (currCharge == maxCharge) {
+          resetTimer();
+        } else {
+          setTimer();
+        }
       }
     }
   }
@@ -89,7 +91,7 @@ class Ability {
   }
   
   void startTimer() {
-    currTimer = timer
+    currTimer = timer;
   }
   
   int getTimer() {
@@ -129,4 +131,4 @@ class Ability {
     return tooltip;
   }
   
-}
+}*/
